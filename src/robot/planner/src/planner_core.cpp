@@ -77,6 +77,9 @@ bool PlannerCore::doAStar(const CellIndex &start_idx, const CellIndex &goal_idx,
   std::unordered_map<CellIndex, CellIndex, CellIndexHash> cameFrom;
   std::unordered_map<CellIndex, double, CellIndexHash> fScore;
 
+  //lambda functions to set and get scores
+
+  //set the score of the cell index
   auto setScore = [&](auto &storage, const CellIndex &idx, double val){
     storage[idx] = val;
   };
@@ -111,6 +114,7 @@ bool PlannerCore::doAStar(const CellIndex &start_idx, const CellIndex &goal_idx,
 
   // Open set (min-heap by f_score)
   std::priority_queue<AStarNode, std::vector<AStarNode>, CompareF> openSet;
+  //initialize the start node
   openSet.push(AStarNode(start_idx, h_start));
 
   while (!openSet.empty()) {
@@ -146,8 +150,9 @@ bool PlannerCore::doAStar(const CellIndex &start_idx, const CellIndex &goal_idx,
       double penalty = cost_val / 25.0;
 
       double tentative_g = current_g + step_cost + penalty;
+      //sees if the cell has been visited yet
       double old_g = getScore(gScore, nb);
-
+      //update the score if the tentative score is less than the old score
       if (tentative_g < old_g) {
         setScore(gScore, nb, tentative_g);
         double h = euclideanHeuristic(nb, goal_idx);

@@ -26,6 +26,7 @@ struct CellIndex
   CellIndex(int xx, int yy) : x(xx), y(yy) {}
   CellIndex() : x(0), y(0) {}
 
+  // define what it means for CellIndex to be equal
   bool operator==(const CellIndex &other) const
   {
     return (x == other.x && y == other.y);
