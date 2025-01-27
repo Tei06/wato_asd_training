@@ -17,7 +17,6 @@ void CostmapCore::transformToChassisFrame(double &x, double &y) {
     x -= robot_x;
     y -= robot_y;
 
-
     double cos_theta = cos(robot_theta);
     double sin_theta = sin(robot_theta);
 
@@ -28,27 +27,28 @@ void CostmapCore::transformToChassisFrame(double &x, double &y) {
     y = y_new;
 }
 
+// convert to grid coordinates, takes in the range and angle and returns x and y coordinates in the cartesian plane
 void CostmapCore::convertToGrid(double range, double angle, int &x_grid, int &y_grid) {
     
     double x = range * cos(angle);
     double y = range * sin(angle);
 
     transformToChassisFrame(x, y);
-
+    //subtract the origin; allows x and y polar coordinates to now be relative to the grid
     x_grid = (x - origin_x_ )/ resolution_;
     y_grid = (y - origin_y_ )/ resolution_;
 }
 
 void CostmapCore::markObstacle(int x_grid, int y_grid) {
+    //check if the cell is empty or not in both the x and y direction
+    //if not empty, mark as occupied
     if (x_grid >= 0 && x_grid < costmap_width_ && y_grid >= 0 && y_grid < costmap_height_) {
         costmap_[y_grid][x_grid] = 100;  // mark as occupied w value 100 in the costmap 2d array
     }
 }
 
 void CostmapCore::inflateObstacles() {
-
     int max_cost = 100;     
-
     // loop each cell
     for (int y = 0; y < costmap_height_; ++y) {
         for (int x = 0; x < costmap_width_; ++x) {
@@ -58,12 +58,11 @@ void CostmapCore::inflateObstacles() {
                         // euclidean distance
                         double dist = std::sqrt(dx * dx + dy * dy);
 
-
                         if (dist <= inflation_radius_) {
                             int inflate_x = x + dx;
                             int inflate_y = y + dy;
 
-                            // Ensure the cell is within bounds
+                            // ensure the cell is within bounds
                             if (inflate_x >= 0 && inflate_x < costmap_width_ && inflate_y >= 0 && inflate_y < costmap_height_) {
                                 // Calculate inflated cost
                                 int inflated_cost = max_cost * (1.0 - (dist / inflation_radius_));
@@ -78,6 +77,7 @@ void CostmapCore::inflateObstacles() {
         }
     }
 }
+
 
 void CostmapCore::publishCostmap(
     rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr costmap_pub_,
